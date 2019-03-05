@@ -1,0 +1,31 @@
+{
+  "name": "pr-agent",
+  "version": "1.0.0",
+  "description": "A simple agent that notifies slack about open PRs",
+  "main": "index.js",
+  "scripts": {
+    "build": "babel src -d dist --source-maps --copy-files",
+    "debug": "node --nolazy --inspect-brk=9229 ./src/main.js",
+    "start": "node ./dist/main.js",
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/fritogotlayed/pr-agent.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fritogotlayed/pr-agent/issues"
+  },
+  "homepage": "https://github.com/fritogotlayed/pr-agent#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "axios": "^0.18.0"
+  }
+}

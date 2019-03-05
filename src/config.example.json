@@ -1,0 +1,7 @@
+{
+    "development": {
+        "githubUser": "someUser",
+        "githubPass": "somePassOrPersonalAccessToken",
+        "githubRepo": "org/repo"
+    }
+}
