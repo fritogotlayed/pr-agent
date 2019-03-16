@@ -7,7 +7,8 @@
     "build": "babel src -d dist --source-maps --copy-files",
     "debug": "node --nolazy --inspect-brk=9229 ./src/main.js",
     "start": "node ./dist/main.js",
-    "test": "make test"
+    "test-unit": "NODE_ENV=test mocha --require @babel/register './src/**/*.spec.js'",
+    "test-unit-cover": "NODE_ENV=test nyc mocha --require @babel/register './src/**/*.spec.js'"
   },
   "repository": {
     "type": "git",
@@ -19,13 +20,21 @@
     "url": "https://github.com/fritogotlayed/pr-agent/issues"
   },
   "homepage": "https://github.com/fritogotlayed/pr-agent#readme",
+  "nyc": {
+    "include": "src",
+    "exclude": "**/*.spec.js"
+  },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
+    "@babel/register": "^7.0.0",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "nyc": "^13.3.0",
+    "sinon": "^7.2.7",
+    "sinon-chai": "^3.3.0"
   },
   "dependencies": {
     "axios": "^0.18.0"

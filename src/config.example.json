@@ -1,7 +1,10 @@
 {
-    "development": {
-        "githubUser": "someUser",
-        "githubPass": "somePassOrPersonalAccessToken",
-        "githubRepo": "org/repo"
-    }
+    "targets": [
+        {
+            "repo": "org/repo",
+            "githubUser": "someUser",
+            "githubPass": "somePassOrPersonalAccessToken",
+            "githubRepo": "org/repo"
+        }
+    ]
 }

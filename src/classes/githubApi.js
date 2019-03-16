@@ -10,44 +10,32 @@ export default class GithubApi {
         this.authHeader = 'Basic ' + Buffer.from(user + ':' + password).toString('base64')
     }
 
-    buildBaseHeaders () {
+    _buildBaseHeaders () {
         return {
             Authorization: this.authHeader
         }
     }
 
-    _makeRequest () {
-        return new Promise((resolve, reject) => {
+    _makeRequest (url ) {
+        let config = {
+            headers: this._buildBaseHeaders()
+        }
 
+        return new Promise((resolve, reject) => {
+            axios.get(url, config).then(resp => {
+                resolve(resp.data)
+            }).catch(err => {
+                reject(err)
+            })
         })
     }
 
     getPullRequests (repo) {
-        let config = {
-            headers: this.buildBaseHeaders()
-        }
-
-        return new Promise((resolve, reject) => {
-            axios.get('https://api.github.com/repos/' + repo +'/pulls', config).then( resp => {
-                resolve(resp.data)
-            }).catch(err => {
-                reject(err)
-            })
-        })
+        return this._makeRequest('https://api.github.com/repos/' + repo +'/pulls')
     }
 
     getPullRequestReviews (repo, prNumber) {
         // https://developer.github.com/v3/pulls/reviews/
-        let config = {
-            headers: this.buildBaseHeaders()
-        }
-
-        return new Promise((resolve, reject) => {
-            axios.get('https://api.github.com/repos/' + repo +'/pulls/' + prNumber + '/reviews', config).then( resp => {
-                resolve(resp.data)
-            }).catch(err => {
-                reject(err)
-            })
-        })
+        return this._makeRequest('https://api.github.com/repos/' + repo +'/pulls/' + prNumber + '/reviews')
     }
 }

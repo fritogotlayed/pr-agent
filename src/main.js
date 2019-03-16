@@ -1,4 +1,5 @@
-import ReportBuilder from './classes/reportBuilder.js'
+const ReportBuilder = require('./classes/reportBuilder').default
+// import ReportBuilder from './classes/reportBuilder.js'
 
 let convertMsToHumanReadable = function (value) {
     let age = (((value / 1000) / 60) / 60) / 24
@@ -99,7 +100,6 @@ let main = function () {
         let count = data.doNotMerge.length + data.other.length
         console.log('Discovered ' + count + ' pull requests in total.')
 
-        // outputGroup('Other', data.other)
         let requestsFeedback = []
         let noReviews = []
         let oneReview = []

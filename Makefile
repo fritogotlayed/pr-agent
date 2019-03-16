@@ -2,7 +2,7 @@
 .PHONY: test tap unit jshint skel help
 REPORTER = spec
 
-all: jshint test  ## TODO: Document
+all: test-unit-cover  ## TODO: Document
 
 build:  ## runs the application
 	npm run build
@@ -10,24 +10,18 @@ build:  ## runs the application
 help:  ## Prints this help message.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-jshint:  ## TODO: Document
-	jshint lib examples test index.js
-
 run:  ## runs the application
 	npm run start
-
-skel:  ## Sets up the skeleton for a project.
-	mkdir examples lib test
-	touch index.js
-	npm install mocha chai --save-dev
 
 tap:  ## TODO: Document
 	@NODE_ENV=test ./node_modules/.bin/mocha -R tap > results.tap
 
 tests: test  ## Synonym for test
 
-test:  ## TODO: Document
-	@NODE_ENV=test ./node_modules/.bin/mocha --recursive --reporter $(REPORTER) --timeout 3000
+test: test-unit  ## Runs all tests available to the project
 
-unit:  ## TODO: Document
-	@NODE_ENV=test ./node_modules/.bin/mocha --recursive -R xunit > results.xml --timeout 3000
+test-unit: ## Runs all the u nit tests available to the project
+	npm run test-unit
+
+test-unit-cover:  ## Runs the unit tests with code coverage enabled
+	npm run test-unit-cover

@@ -1,4 +1,4 @@
-const rawConfig = require('../config.json')
+const fs = require('fs')
 
 export default class PrAgentConfig {
     constructor() {
@@ -15,11 +15,11 @@ export default class PrAgentConfig {
     }
 
     _getConfig () {
-        let env = 'development'
-        if (process.env.NODE_ENV) {
-            env = process.env.NODE_ENV
+        if (this._config == null) {
+            let cfgPath = process.env.CONFIG_PATH || './src/config.json'
+            this._config = JSON.parse(fs.readFileSync(cfgPath, 'utf8'))
         }
 
-        return rawConfig[env]
+        return this._config
     }
 }

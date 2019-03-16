@@ -1,22 +1,26 @@
-import GithubApi from './githubApi.js'
-import PrAgentConfig from './prAgentConfig.js'
-import PullRequestData from './pullRequestData.js'
+// import GithubApi from './githubApi.js'
+// import PrAgentConfig from './prAgentConfig.js'
+// import PullRequestData from './pullRequestData.js'
+const GithubApi = require('./githubApi').default
+const PrAgentConfig = require('./prAgentConfig').default
+const PullRequestData = require('./pullRequestData').default
 
 export default class ReportBuilder {
     constructor() {
     }
 
-    buildReport () {
+    buildReport (repoConfig) {
         return new Promise((resolve, reject) => {
             let report = {
+                repo: '',
                 doNotMerge: [],
                 other: []
             }
-            let config = new PrAgentConfig()
-            let orgRepo = config.githubRepo
+            // TODO: Handle more than one target repository
+            repoConfig = repoConfig || new PrAgentConfig().targets[0]
 
-            let api = new GithubApi(config.githubUser, config.githubPass);
-            api.getPullRequests(orgRepo).then( data => {
+            let api = new GithubApi(repoConfig.githubUser, repoConfig.githubPass);
+            api.getPullRequests(repoConfig.repo).then( data => {
                 let pullRequests = data
 
                 let now = new Date()
@@ -36,7 +40,7 @@ export default class ReportBuilder {
                     if (isDoNotMerge) {
                         report.doNotMerge.push(simplifiedPr)
                     } else {
-                        api.getPullRequestReviews(orgRepo, pr.number).then(data => {
+                        api.getPullRequestReviews(repoConfig.repo, pr.number).then(data => {
                             report.other.push(simplifiedPr)
                             if (data.length > 0) {
                                 let sortFunc = function(o1, o2) { return new Date(o1.submitted_at) - new Date(o2.submitted_at)}

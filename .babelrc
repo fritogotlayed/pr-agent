@@ -4,4 +4,8 @@
     ],
     "sourceMaps": "inline",
     "retainLines": true,
+    "ignore": [
+        "**/*.test.js",
+        "**/*.spec.js",
+    ]
 }
