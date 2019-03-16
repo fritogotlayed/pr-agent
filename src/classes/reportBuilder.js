@@ -1,5 +1,6 @@
 import GithubApi from './githubApi.js'
 import PrAgentConfig from './prAgentConfig.js'
+import PullRequestData from './pullRequestData.js'
 
 export default class ReportBuilder {
     constructor() {
@@ -9,10 +10,7 @@ export default class ReportBuilder {
         return new Promise((resolve, reject) => {
             let report = {
                 doNotMerge: [],
-                requestsFeedback: [],
-                zeroReviews: [],
-                oneReview: [],
-                twoOrMoreReviews: []
+                other: []
             }
             let config = new PrAgentConfig()
             let orgRepo = config.githubRepo
@@ -23,11 +21,11 @@ export default class ReportBuilder {
 
                 let now = new Date()
                 pullRequests.forEach(pr => {
-                    let simplifiedPr = {
-                        number: pr.number,
-                        title: pr.title,
-                        ageMs: now - new Date(pr.created_at)
-                    }
+                    let simplifiedPr = new PullRequestData(
+                        pr.number,
+                        pr.title,
+                        now - new Date(pr.created_at)
+                    );
                     let isDoNotMerge = false;
                     pr.labels.forEach(label => {
                         if (label.name == "Do Not Merge") {
@@ -39,33 +37,16 @@ export default class ReportBuilder {
                         report.doNotMerge.push(simplifiedPr)
                     } else {
                         api.getPullRequestReviews(orgRepo, pr.number).then(data => {
-                            if (data.length == 0) {
-                                report.zeroReviews.push(simplifiedPr)
-                            } else {
-                                let requestsFeedback = false
-                                data.forEach(review => {
-                                    // TODO: Probably need to get the latest review status per reviewer
-                                    if (review.state != "APPROVED") {
-                                        requestsFeedback = true
-                                    }
+                            report.other.push(simplifiedPr)
+                            if (data.length > 0) {
+                                let sortFunc = function(o1, o2) { return new Date(o1.submitted_at) - new Date(o2.submitted_at)}
+                                data.sort(sortFunc).forEach(review => {
+                                    // NOTE: The add review call keeps only the latest review state due to our sorting.
+                                    simplifiedPr.addReview(review.user.login, review.state)
                                 })
-
-                                if (requestsFeedback) {
-                                    report.requestsFeedback.push(simplifiedPr)
-                                } else {
-                                    if (data.length == 1) {
-                                        report.oneReview.push(simplifiedPr)
-                                    } else {
-                                        report.twoOrMoreReviews.push(simplifiedPr)
-                                    }
-                                }
                             }
 
-                            if (report.doNotMerge.length
-                                + report.requestsFeedback.length
-                                + report.zeroReviews.length
-                                + report.oneReview.length
-                                + report.twoOrMoreReviews.length == pullRequests.length) {
+                            if (report.doNotMerge.length + report.other.length == pullRequests.length) {
                                 resolve(report)
                             }
                         })

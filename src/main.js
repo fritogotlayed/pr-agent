@@ -96,14 +96,35 @@ let outputGroup = function(header, data) {
 let main = function () {
     let reportBuilder = new ReportBuilder()
     reportBuilder.buildReport().then(data => {
-        let count = data.doNotMerge.length + data.requestsFeedback.length + data.zeroReviews.length + data.oneReview.length + data.twoOrMoreReviews.length
+        let count = data.doNotMerge.length + data.other.length
         console.log('Discovered ' + count + ' pull requests in total.')
 
+        // outputGroup('Other', data.other)
+        let requestsFeedback = []
+        let noReviews = []
+        let oneReview = []
+        let twoOrMoreReviews = []
+
+        data.other.forEach(pr => {
+            if (pr.hasFailedReview()) {
+                requestsFeedback.push(pr)
+            } else {
+                let cnt = Object.keys(pr.reviews).length
+                if (cnt == 0){
+                    noReviews.push(pr)
+                } else if (cnt == 1) {
+                    oneReview.push(pr)
+                } else {
+                    twoOrMoreReviews.push(pr)
+                }
+            }
+        })
+
         outputGroup('Do Not Merge', data.doNotMerge)
-        outputGroup('Requests Feedback', data.requestsFeedback)
-        outputGroup('Needs Review', data.zeroReviews)
-        outputGroup('Needs Second Review', data.oneReview)
-        outputGroup('Ready To Merge', data.twoOrMoreReviews)
+        outputGroup('Requests Feedback', requestsFeedback)
+        outputGroup('Needs Review', noReviews)
+        outputGroup('Needs Second Review', oneReview)
+        outputGroup('Ready To Merge', twoOrMoreReviews)
     }).catch(err => {
         console.log(err)
     })
