@@ -7,7 +7,7 @@
     "build": "babel src -d dist --source-maps --copy-files",
     "debug": "node --nolazy --inspect-brk=9229 ./src/main.js",
     "start": "node ./dist/main.js",
-    "test": "make test"
+    "test": "env NODE_ENV=test ./node_modules/.bin/mocha --recursive --reporter spec --timeout 3000"
   },
   "repository": {
     "type": "git",
