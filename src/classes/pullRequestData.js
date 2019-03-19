@@ -17,11 +17,15 @@ export default class PullRequestData {
 
     addReview(reviewer, status) {
         // We don't care about non definitive reviews
-        if (status == null || status == "COMMENTED" || status == "DISMISSED"){
+        if (status == null || status == "COMMENTED") {
             return
-        } else if (status == "CHANGES_REQUESTED"){
+        } else if (status == "DISMISSED") {
+            if (this.reviews.hasOwnProperty(reviewer)) {
+                delete this.reviews[reviewer]
+            }
+        } else if (status == "CHANGES_REQUESTED") {
             this.reviews[reviewer] = false
-        } else if (status == "APPROVED"){
+        } else if (status == "APPROVED") {
             this.reviews[reviewer] = true
         } else {
             // unknown status

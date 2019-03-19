@@ -2,8 +2,6 @@
 .PHONY: test tap unit jshint skel help
 REPORTER = spec
 
-all: test-unit-cover  ## TODO: Document
-
 build:  ## runs the application
 	npm run build
 
@@ -12,9 +10,6 @@ help:  ## Prints this help message.
 
 run:  ## runs the application
 	npm run start
-
-tap:  ## TODO: Document
-	@NODE_ENV=test ./node_modules/.bin/mocha -R tap > results.tap
 
 tests: test  ## Synonym for test
 

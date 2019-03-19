@@ -9,18 +9,34 @@ export default class ReportBuilder {
     constructor() {
     }
 
+    buildReports (targets) {
+        targets = targets || new PrAgentConfig().targets
+
+        return new Promise((resolve, reject) => {
+            let children = []
+            targets.forEach((t) => {
+                children.push(this.buildReport(t))
+            })
+
+            Promise.all(children).then((data) => {
+                resolve(data)
+            }).catch((err) => {
+                reject()
+            })
+        })
+    }
+
     buildReport (repoConfig) {
         return new Promise((resolve, reject) => {
+            repoConfig = repoConfig || new PrAgentConfig().targets[0]
             let report = {
-                repo: '',
+                repo: repoConfig.githubRepo,
                 doNotMerge: [],
                 other: []
             }
-            // TODO: Handle more than one target repository
-            repoConfig = repoConfig || new PrAgentConfig().targets[0]
 
             let api = new GithubApi(repoConfig.githubUser, repoConfig.githubPass);
-            api.getPullRequests(repoConfig.repo).then( data => {
+            api.getPullRequests(repoConfig.githubRepo).then( data => {
                 let pullRequests = data
 
                 let now = new Date()
@@ -40,7 +56,7 @@ export default class ReportBuilder {
                     if (isDoNotMerge) {
                         report.doNotMerge.push(simplifiedPr)
                     } else {
-                        api.getPullRequestReviews(repoConfig.repo, pr.number).then(data => {
+                        api.getPullRequestReviews(repoConfig.githubRepo, pr.number).then(data => {
                             report.other.push(simplifiedPr)
                             if (data.length > 0) {
                                 let sortFunc = function(o1, o2) { return new Date(o1.submitted_at) - new Date(o2.submitted_at)}

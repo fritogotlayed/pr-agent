@@ -94,37 +94,53 @@ let outputGroup = function(header, data) {
     }
 }
 
-let main = function () {
-    let reportBuilder = new ReportBuilder()
-    reportBuilder.buildReport().then(data => {
-        let count = data.doNotMerge.length + data.other.length
-        console.log('Discovered ' + count + ' pull requests in total.')
+let outputRepo = function (data) {
+    let count = data.doNotMerge.length + data.other.length
+    console.log('Discovered ' + count + ' pull requests in repo ' + data.repo + ' in total.')
 
-        let requestsFeedback = []
-        let noReviews = []
-        let oneReview = []
-        let twoOrMoreReviews = []
+    let requestsFeedback = []
+    let noReviews = []
+    let oneReview = []
+    let twoOrMoreReviews = []
 
-        data.other.forEach(pr => {
-            if (pr.hasFailedReview()) {
-                requestsFeedback.push(pr)
+    data.other.forEach(pr => {
+        if (pr.hasFailedReview()) {
+            requestsFeedback.push(pr)
+        } else {
+            let cnt = Object.keys(pr.reviews).length
+            if (cnt == 0){
+                noReviews.push(pr)
+            } else if (cnt == 1) {
+                oneReview.push(pr)
             } else {
-                let cnt = Object.keys(pr.reviews).length
-                if (cnt == 0){
-                    noReviews.push(pr)
-                } else if (cnt == 1) {
-                    oneReview.push(pr)
-                } else {
-                    twoOrMoreReviews.push(pr)
-                }
+                twoOrMoreReviews.push(pr)
             }
-        })
+        }
+    })
 
-        outputGroup('Do Not Merge', data.doNotMerge)
-        outputGroup('Requests Feedback', requestsFeedback)
-        outputGroup('Needs Review', noReviews)
-        outputGroup('Needs Second Review', oneReview)
-        outputGroup('Ready To Merge', twoOrMoreReviews)
+    outputGroup('Do Not Merge', data.doNotMerge)
+    outputGroup('Requests Feedback', requestsFeedback)
+    outputGroup('Needs Review', noReviews)
+    outputGroup('Needs Second Review', oneReview)
+    outputGroup('Ready To Merge', twoOrMoreReviews)
+}
+
+let main = function () {
+    let separator = '#'.repeat(30)
+    let reportBuilder = new ReportBuilder()
+    reportBuilder.buildReports().then(listData => {
+        console.log(separator)
+        console.log('')
+        listData.forEach((data, idx) => {
+            if (idx != 0) {
+                console.log('')
+                console.log(separator)
+                console.log('')
+            }
+            outputRepo(data)
+        })
+        console.log('')
+        console.log(separator)
     }).catch(err => {
         console.log(err)
     })
