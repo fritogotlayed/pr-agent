@@ -8,7 +8,7 @@ describe('The githubApi module', function () {
     return new Promise((resolve, reject) => {
       // Arrange
       let expectedData = [ {}, {} ]
-      const getResolved = new Promise((r) => r({ data: expectedData }))
+      const getResolved = new Promise((r) => r({ status:200, data: expectedData }))
       var mockAxios = this.sandbox.mock(axios);
 
       mockAxios.expects('get').withArgs(
@@ -31,7 +31,7 @@ describe('The githubApi module', function () {
     return new Promise((resolve, reject) => {
       // Arrange
       let expectedData = [ {}, {} ]
-      const getResolved = new Promise((r) => r({ data: expectedData }))
+      const getResolved = new Promise((r) => r({ status:200, data: expectedData }))
       var mockAxios = this.sandbox.mock(axios);
 
       mockAxios.expects('get').withArgs(
@@ -74,4 +74,30 @@ describe('The githubApi module', function () {
       })
     })
   })
+
+  it('fails request when non-200 status returned', function () {
+    return new Promise((resolve, reject) => {
+      // Arrange
+      const expectedResponse = { status: 404 }
+      const getResolved = new Promise((resolve) => resolve(expectedResponse))
+      var mockAxios = this.sandbox.mock(axios);
+
+      mockAxios.expects('get').withArgs(
+        'https://api.github.com/repos/org/repo/pulls/1/reviews',
+        { headers: { Authorization: "Basic dGVzdFVzZXI6dGVzdFBhc3M=" } }
+      ).returns(getResolved)
+
+      // Act
+      gh = new GithubApi('testUser', 'testPass')
+      gh.getPullRequestReviews('org/repo', 1).then(() => {
+        reject(new Error('Test succeeded when it should of failed'))
+      }).catch(r => {
+        // Assert
+        mockAxios.verify();
+        expect(r).to.equal(expectedResponse)
+        resolve()
+      })
+    })
+  })
+
 })

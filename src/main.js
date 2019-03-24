@@ -2,15 +2,8 @@ const ReportBuilder = require('./classes/reportBuilder').default
 // import ReportBuilder from './classes/reportBuilder.js'
 
 let convertMsToHumanReadable = function (value) {
-    let age = (((value / 1000) / 60) / 60) / 24
-    age = Math.floor(age * 100) / 100
-    age += ' days old'
-    return age
-}
-
-let convertMsToHumanReadable2 = function (value) {
     let x = value
-    let seconds, minutes, hours, days = 0
+    let seconds, minutes, hours, days
     x = Math.floor(x / 1000)
     seconds = x % 60
     x = Math.floor(x / 60)
@@ -20,66 +13,13 @@ let convertMsToHumanReadable2 = function (value) {
     x = Math.floor(x / 24)
     days = x
 
-    let msg = ''
-    if (days > 0) { msg += days + 'd ' }
-    if (hours > 0) { msg += hours + 'h ' }
-    if (minutes > 0) { msg += minutes + 'm ' }
-    if (seconds > 0) { msg += seconds + 's' }
+    let parts = []
+    if (days > 0) { parts.push(days + 'd') }
+    if (hours > 0) { parts.push(hours + 'h') }
+    if (minutes > 0) { parts.push(minutes + 'm') }
+    if (seconds > 0) { parts.push(seconds + 's') }
 
-    return msg
-}
-
-let convertMsToHumanReadable3 = function (value) {
-    let x = value
-    let seconds, minutes, hours, days = 0
-    x = Math.floor(x / 1000)
-    seconds = x % 60
-    x = Math.floor(x / 60)
-    minutes = x % 60
-    x = Math.floor(x / 60)
-    hours = x % 24
-    x = Math.floor(x / 24)
-    days = x
-
-    let msg = ''
-    if (days > 0) { return days + ' days old' }
-    if (hours > 0) { return hours + ' hours old' }
-    if (minutes > 0) { return minutes + ' minutes old' }
-    if (seconds > 0) { return seconds + ' seconds old' }
-
-    return msg
-}
-
-let convertMsToHumanReadable4 = function (value) {
-    const interval_threshold = 0
-    let seconds = Math.floor(value / 1000);
-
-    let interval = Math.floor(seconds / 31536000);
-    if (interval > interval_threshold) {
-        return interval + " years";
-    }
-
-    interval = Math.floor(seconds / 2592000);
-    if (interval > interval_threshold) {
-        return interval + " months";
-    }
-
-    interval = Math.floor(seconds / 86400);
-    if (interval > interval_threshold) {
-        return interval + " days";
-    }
-
-    interval = Math.floor(seconds / 3600);
-    if (interval > interval_threshold) {
-        return interval + " hours";
-    }
-
-    interval = Math.floor(seconds / 60);
-    if (interval > interval_threshold) {
-        return interval + " minutes";
-    }
-
-    return seconds + " seconds";
+    return parts.join(' ')
 }
 
 let outputGroup = function(header, data) {
@@ -87,9 +27,14 @@ let outputGroup = function(header, data) {
         console.log('')
         console.log(header)
         console.log('='.repeat(header.length))
-        data.forEach( pr => {
-            let age = convertMsToHumanReadable2(pr.ageMs)
-            console.log('[' + pr.number + '] ('+ age + ') ' + pr.title)
+        let sortFunc = function(o1, o2) { return o2.number - o1.number }
+        data.sort(sortFunc).forEach( pr => {
+            let age = convertMsToHumanReadable(pr.ageMs)
+            console.log('[' + pr.number + '] ('+ age + ') ' + pr.title + ' by ' + pr.author)
+            let reviewers = Object.keys(pr.reviews)
+            if (reviewers.length > 0) {
+                console.log('    - Reviewed by: ' + reviewers.join(', '))
+            }
         });
     }
 }
@@ -108,9 +53,9 @@ let outputRepo = function (data) {
             requestsFeedback.push(pr)
         } else {
             let cnt = Object.keys(pr.reviews).length
-            if (cnt == 0){
+            if (cnt === 0){
                 noReviews.push(pr)
-            } else if (cnt == 1) {
+            } else if (cnt === 1) {
                 oneReview.push(pr)
             } else {
                 twoOrMoreReviews.push(pr)
@@ -131,13 +76,15 @@ let main = function () {
     reportBuilder.buildReports().then(listData => {
         console.log(separator)
         console.log('')
-        listData.forEach((data, idx) => {
-            if (idx != 0) {
+        let outputCount = 0
+        listData.forEach((data) => {
+            if (outputCount !== 0) {
                 console.log('')
                 console.log(separator)
                 console.log('')
             }
             outputRepo(data)
+            outputCount += 1
         })
         console.log('')
         console.log(separator)

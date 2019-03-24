@@ -28,7 +28,6 @@ export default class ReportBuilder {
 
     buildReport (repoConfig) {
         return new Promise((resolve, reject) => {
-            repoConfig = repoConfig || new PrAgentConfig().targets[0]
             let report = {
                 repo: repoConfig.githubRepo,
                 doNotMerge: [],
@@ -39,12 +38,17 @@ export default class ReportBuilder {
             api.getPullRequests(repoConfig.githubRepo).then( data => {
                 let pullRequests = data
 
+                if (pullRequests.length === 0) {
+                    resolve(report)
+                }
+
                 let now = new Date()
                 pullRequests.forEach(pr => {
                     let simplifiedPr = new PullRequestData(
                         pr.number,
                         pr.title,
-                        now - new Date(pr.created_at)
+                        now - new Date(pr.created_at),
+                        pr.user.login
                     );
                     let isDoNotMerge = false;
                     pr.labels.forEach(label => {
@@ -56,8 +60,13 @@ export default class ReportBuilder {
                     if (isDoNotMerge) {
                         report.doNotMerge.push(simplifiedPr)
                     } else {
+                        report.other.push(simplifiedPr)
+                    }
+
+                    if (report.other.length == 0 && report.doNotMerge.length == pullRequests.length) {
+                        resolve(report)
+                    } else {
                         api.getPullRequestReviews(repoConfig.githubRepo, pr.number).then(data => {
-                            report.other.push(simplifiedPr)
                             if (data.length > 0) {
                                 let sortFunc = function(o1, o2) { return new Date(o1.submitted_at) - new Date(o2.submitted_at)}
                                 data.sort(sortFunc).forEach(review => {
@@ -71,6 +80,7 @@ export default class ReportBuilder {
                             }
                         })
                     }
+
                 });
 
             }).catch(err => {

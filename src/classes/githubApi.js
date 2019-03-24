@@ -16,14 +16,24 @@ export default class GithubApi {
         }
     }
 
-    _makeRequest (url ) {
+    // NOTE: un-comment this if you ever need to use a request against the beta github API endpoint.
+    // _makeRequest (url, acceptPreview=false) {
+    _makeRequest (url) {
         let config = {
             headers: this._buildBaseHeaders()
         }
 
+        // if (acceptPreview) {
+        //     config.headers['Accept'] = 'application/vnd.github.antiope-preview+json'
+        // }
+
         return new Promise((resolve, reject) => {
             axios.get(url, config).then(resp => {
-                resolve(resp.data)
+                if (resp.status < 300) {
+                    resolve(resp.data)
+                } else {
+                    reject(resp)
+                }
             }).catch(err => {
                 reject(err)
             })

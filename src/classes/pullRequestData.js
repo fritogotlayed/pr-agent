@@ -1,17 +1,19 @@
 export default class PullRequestData {
-    constructor(number, title, age) {
+    constructor(number, title, age, author) {
         if (!arguments.length){
             // new()
             this.number = null
             this.title = null
             this.ageMs = null
             this.reviews = {}
+            this.author = null
         } else {
-            // new(number, title, age)
+            // new(number, title, age, author)
             this.number = number
             this.title = title
             this.ageMs = age
             this.reviews = {}
+            this.author = author
         }
     }
 
